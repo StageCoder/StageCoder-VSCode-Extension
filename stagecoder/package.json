@@ -89,6 +89,13 @@
           "type": "boolean",
           "default": false,
           "description": "Enable automatic code highlight on selection."
+        },
+        "stagecoder.dimOpacity": {
+          "type": "number",
+          "default": 0.2,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacity for dimming non-selected code (0 = fully transparent, 1 = fully opaque)."
         }
       }
     }

@@ -325,8 +325,13 @@ export async function highlightSelectedCode() {
 	if (selectionClearDecorationType) {
 		selectionClearDecorationType.dispose();
 	}
+	// Get user-configured opacity for dimming
+	const config = vscode.workspace.getConfiguration('stagecoder');
+	const dimOpacity = config.get<number>('dimOpacity', 0.2);
+	// Use opacity property to dim the text but preserve syntax highlighting
 	highlightDecorationType = vscode.window.createTextEditorDecorationType({
-		color: 'rgba(128,128,128,0.7)', // Dim only the text, not the background
+		opacity: dimOpacity.toString(),
+		isWholeLine: false
 	});
 	selectionClearDecorationType = vscode.window.createTextEditorDecorationType({
 		backgroundColor: new vscode.ThemeColor('editor.background'),
