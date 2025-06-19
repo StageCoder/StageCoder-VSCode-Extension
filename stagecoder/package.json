@@ -2,7 +2,7 @@
   "name": "stagecodervscode",
   "displayName": "StageCoder",
   "description": "StageCoder: Live code presentation and teaching toolkit. Instantly type or replace code from snippets, highlight code, suppress distractions, and create new snippets from selections. Perfect for live demos, workshops, and teaching.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.101.0"
   },

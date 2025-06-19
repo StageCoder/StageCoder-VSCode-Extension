@@ -6,13 +6,13 @@ StageCoder is an extension for live code presentations, workshops, and teaching 
 
 Easily highlight code to focus your audience:
 
-![Highlight feature demo](media/highlight.gif)
+![Highlight feature demo](stagecoder/media/highlight.gif)
 
 ## Type Code from Snippet
 
 Simulate live typing for presentations:
 
-![TypeCode feature demo](media/typecode.gif)
+![TypeCode feature demo](stagecoder/media/typecode.gif)
 
 ## Features at a Glance
 
