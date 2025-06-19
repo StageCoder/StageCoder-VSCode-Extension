@@ -16,7 +16,6 @@
   ],
   "main": "./out/extension.js",
   "icon": "media/stagecoder.png",
-  "publisher": "EngstromJimmy",
   "contributes": {
 		"keybindings":[
 			{
