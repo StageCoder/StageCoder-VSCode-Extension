@@ -8,15 +8,12 @@ import * as CodePresenter from './stagecoder'
 export function activate(context: vscode.ExtensionContext) {
 
 	const typeCommand = vscode.commands.registerCommand("type", CodePresenter.onType);
-	
-	const activateCommand = vscode.commands.registerCommand('stagecoder.activate', function () {
-		CodePresenter.loadSnippets();
-		vscode.workspace.getConfiguration("editor").update("fontSize", "30", true);
-	});
-	
-	const escapeCommand = vscode.commands.registerCommand('stagecoder.escape', function () {
+	context.subscriptions.push(typeCommand);
+
+	const escapeCommand = vscode.commands.registerCommand('StageCoder.Escape', function () {
 		CodePresenter.setTyping(false);
 	});
+	context.subscriptions.push(escapeCommand);
 
 	const reloadSnippetsCommand = vscode.commands.registerCommand('StageCoder.Reloadsnippets', function () {
 		CodePresenter.loadSnippets();
@@ -33,11 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(typeCodeCommand);
 
-	const toggleHighlightCommand = vscode.commands.registerCommand('StageCoder.ToggleCodeHighlight', function () {
-		CodePresenter.highlightSelectedCode();
-	});
-	context.subscriptions.push(toggleHighlightCommand);
-
+	
 	const enableHighlightCommand = vscode.commands.registerCommand('StageCoder.EnableSelectedCodeHighlight', async function () {
 		await CodePresenter.enableCodeHighlight();
 		await CodePresenter.setSelectionBackgroundToEditorBackground(true);
@@ -51,6 +44,20 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Selected code highlight disabled');
 	});
 	context.subscriptions.push(disableHighlightCommand);
+
+	const toggleHighlightCommand = vscode.commands.registerCommand('StageCoder.ToggleCodeHighlight', async function () {
+		const isEnabled = CodePresenter.isCodeHighlightEnabled();
+		if (isEnabled) {
+			await CodePresenter.disableCodeHighlight();
+			await CodePresenter.setSelectionBackgroundToEditorBackground(false);
+			vscode.window.showInformationMessage('Selected code highlight disabled');
+		} else {
+			await CodePresenter.enableCodeHighlight();
+			await CodePresenter.setSelectionBackgroundToEditorBackground(true);
+			vscode.window.showInformationMessage('Selected code highlight enabled');
+		}
+	});
+	context.subscriptions.push(toggleHighlightCommand);
 
 	// Listen for selection changes and dim non-selected text
 	const selectionListener = vscode.window.onDidChangeTextEditorSelection((event) => {
@@ -82,9 +89,12 @@ export function activate(context: vscode.ExtensionContext) {
 	// In your activate function, read the setting and enable highlight if set
 	const config = vscode.workspace.getConfiguration('stagecoder');
 
-	context.subscriptions.push(typeCommand);
-	context.subscriptions.push(activateCommand);
-	context.subscriptions.push(escapeCommand);
+	const createSnippetFromSelectionCommand = vscode.commands.registerCommand('StageCoder.CreateSnippetFromSelection', async function () {
+		await CodePresenter.createSnippetFromSelection();
+	});
+	context.subscriptions.push(createSnippetFromSelectionCommand);
+
+	
 }
 
 // This method is called when your extension is deactivated

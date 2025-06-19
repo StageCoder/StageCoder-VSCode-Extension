@@ -1,54 +1,69 @@
-# StageCoder
+# StageCoder for Visual Studio Code
 
-StageCoder is a live code presentation and teaching toolkit for Visual Studio Code. Instantly type or replace code from snippets, highlight code, suppress distractions, and create new snippets from selections. Perfect for live demos, workshops, and teaching.
+StageCoder is an extension for live code presentations, workshops, and teaching in VS Code. It helps you present code smoothly, highlight selections, and manage code snippets—all while suppressing distractions like suggestions and Copilot.
 
-## Features
+## Code Highlighting
 
-- **Type code from snippets**: Use the `StageCoder.Typecode` command to type out code from a snippet one character at a time, simulating live coding.
-- **Replace code with snippets**: Use the `StageCoder.Replacecode` command to instantly replace a comment or selection with a snippet.
-- **Clipboard as snippet**: Use `[clipboard]` as the snippet name to use the current clipboard contents as your snippet.
-- **Reload snippets**: Use the `StageCoder.Reloadsnippets` command to reload all snippets from `.code-snippets` files in your workspace.
-- **Create snippets from selection**: Right-click any selection and choose "Create snippet from selection" to save it as a new snippet in your workspace. It will be created in a folder called Snippets.
-- **Highlight selected code**: Enable code highlight to dim all non-selected text, making your selection stand out. Toggle with `StageCoder.ToggleCodeHighlight` or enable/disable with `StageCoder.EnableSelectedCodeHighlight` and `StageCoder.DisableSelectedCodeHighlight`.
-- **Suppress distractions**: When typing code from a snippet, all suggestions, Copilot, and popups are suppressed for a distraction-free presentation.
-- **Settings persistence**: The code highlight feature is persisted as a workspace setting and restored between sessions.
+Easily highlight code to focus your audience:
 
-## Commands & Shortcuts
+![Highlight feature demo](media/highlight.gif)
 
-| Command                                      | Description                                              | Shortcut Key         |
-|----------------------------------------------|----------------------------------------------------------|----------------------|
-| `StageCoder.Typecode`                        | Type code from a snippet (optionally provide a snippet name or `[clipboard]`). | *(No default)*       |
-| `StageCoder.Replacecode`                     | Instantly replace selection with a snippet (optionally provide a snippet name or `[clipboard]`). | *(No default)*       |
-| `StageCoder.Reloadsnippets`                  | Reload all snippets from `.code-snippets` files.          | *(No default)*       |
-| `StageCoder.ToggleCodeHighlight`             | Toggle code highlight on/off.                            | *(No default)*       |
-| `StageCoder.EnableSelectedCodeHighlight`     | Enable code highlight on selection.                      | *(No default)*       |
-| `StageCoder.DisableSelectedCodeHighlight`    | Disable code highlight on selection.                     | *(No default)*       |
-| `StageCoder.CreateSnippetFromSelection`      | Create a new snippet from the selected text.             | *(Context menu)*     |
-| `stagecoder.escape`                          | Escape/exit typing mode.                                 | `Escape`, `Tab`      |
-| `stagecoder.setsnippet`                      | Set snippet (legacy, use Typecode).                      | `Shift+Tab`          |
-| `stagecoder.highlightSelection`              | Highlight selected code (legacy, use ToggleCodeHighlight).| `Ctrl+Alt+H`         |
+## Type Code from Snippet
 
-> **Tip:** You can assign your own shortcuts to any command via VS Code's Keyboard Shortcuts UI.
+Simulate live typing for presentations:
+
+![TypeCode feature demo](media/typecode.gif)
+
+## Features at a Glance
+
+- **Type code from snippets**: Simulate live typing of code from a snippet or your clipboard.
+- **Replace code with snippets**: Instantly replace a selection or comment with a snippet or clipboard content.
+- **Create snippets from selection**: Right-click any selection and choose "Create snippet from selection" to save it for later use.
+- **Highlight code**: Dim all non-selected text to focus your audience’s attention. Toggle with a shortcut.
+- **Distraction suppression**: While typing or replacing code, all suggestions, Copilot, and popups are suppressed.
+- **Stream Deck support**: Use the command names `StageCoder.Typecode` and `StageCoder.Replacecode` for Stream Deck integration.
+
+## How to Use (Command Palette)
+
+Open the Command Palette with <kbd>Ctrl+Shift+P</kbd> (or <kbd>Cmd+Shift+P</kbd> on Mac) and search for:
+
+- **Type code from snippet**: Simulate typing code from a named snippet or `[clipboard]`.
+- **Replace code with snippet**: Instantly replace selection with a named snippet or `[clipboard]`.
+- **Reload snippets**: Reload all `.code-snippets` files in your workspace.
+- **Create snippet from selection**: Save the current selection as a new snippet (also available in the right-click context menu).
+- **Toggle code highlight**: Turn code highlighting on or off (dims non-selected text).
+- **Enable/Disable code highlight**: Explicitly enable or disable code highlighting.
+
+## Keyboard Shortcuts
+
+| Action                        | Shortcut         |
+|-------------------------------|------------------|
+| Toggle code highlight         | Ctrl+Shift+H     |
+| Type code from snippet        | Shift+Tab        |
+| Escape typing mode            | Escape, Tab      |
+
+> You can customize shortcuts in VS Code’s Keyboard Shortcuts settings.
 
 ## Stream Deck Integration
 
-All StageCoder commands can be triggered using a Stream Deck with the [nicollasricas/decks-vscode](https://marketplace.visualstudio.com/items?itemName=nicollasricas.decks-vscode) extension. This allows you to control your live coding session hands-free!
+For hands-free control, use the [decks-vscode](https://marketplace.visualstudio.com/items?itemName=nicollasricas.decks-vscode) extension. Assign the following command IDs to your Stream Deck:
 
-## Extension Settings
+- `StageCoder.Typecode`
+- `StageCoder.Replacecode`
 
-- `stagecoder.selectedCodeHighlight`: Enable automatic code highlight on selection (default: false).
+## Settings
+
+- `stagecoder.selectedCodeHighlight` (boolean): Enable automatic code highlight on selection (default: false).
 
 ## Requirements
 
-- No special requirements. For Stream Deck integration, install the [decks-vscode](https://marketplace.visualstudio.com/items?itemName=nicollasricas.decks-vscode) extension.
+- No special requirements. For Stream Deck, install the [decks-vscode](https://marketplace.visualstudio.com/items?itemName=nicollasricas.decks-vscode) extension.
 
 ## Known Issues
 
 - Some language servers or extensions may still show suggestions despite suppression settings.
-- Copilot suggestions are suppressed as much as possible, but future Copilot updates may require further adjustments.
+- Copilot suppression is best-effort and may require updates if Copilot changes.
 
-## Release Notes
+## License
 
-### 1.0.0
-
-Initial release of StageCoder: live code presentation, snippet management, distraction suppression, and Stream Deck integration.
+MIT License © 2025 Jimmy Engstrom

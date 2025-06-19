@@ -1,8 +1,8 @@
 {
-  "name": "stagecoder",
+  "name": "stagecodervscode",
   "displayName": "StageCoder",
   "description": "StageCoder: Live code presentation and teaching toolkit. Instantly type or replace code from snippets, highlight code, suppress distractions, and create new snippets from selections. Perfect for live demos, workshops, and teaching.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.101.0"
   },
@@ -19,26 +19,26 @@
   "contributes": {
 		"keybindings":[
 			{
-				"command": "stagecoder.escape",
+				"command": "StageCoder.Escape",
 				"key": "Escape"
 			},
 			{
-				"command": "stagecoder.escape",
+				"command": "StageCoder.Escape",
 				"key": "Tab"
 			},
 			{
-				"command": "stagecoder.setsnippet",
+				"command": "StageCoder.Typecode",
 				"key": "shift+tab"
 			},
 			{
-				"command": "stagecoder.highlightSelection",
-				"key": "ctrl+alt+h"
+				"command": "StageCoder.ToggleCodeHighlight",
+				"key": "ctrl+shift+h"
 			}
 		],
 		"commands": [
 
       {
-        "command": "stagecoder.createSnippetFromSelection",
+        "command": "StageCoder.CreateSnippetFromSelection",
         "title": "Create snippet from selection",
         "category": "StageCoder"
       },
@@ -58,11 +58,6 @@
         "category": "StageCoder"
       },
       {
-        "command": "StageCoder.ToggleCodeHighlight",
-        "title": "Toggle Code Highlight",
-        "category": "StageCoder"
-      },
-      {
         "command": "StageCoder.EnableSelectedCodeHighlight",
         "title": "Enable Selected Code Highlight",
         "category": "StageCoder"
@@ -71,12 +66,17 @@
         "command": "StageCoder.DisableSelectedCodeHighlight",
         "title": "Disable Selected Code Highlight",
         "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.ToggleCodeHighlight",
+        "title": "Toggle Code Highlight",
+        "category": "StageCoder"
       }
 		],
     "menus": {
       "editor/context": [
         {
-          "command": "stagecoder.createSnippetFromSelection",
+          "command": "StageCoder.CreateSnippetFromSelection",
           "when": "editorHasSelection",
           "group": "navigation@100"
         }

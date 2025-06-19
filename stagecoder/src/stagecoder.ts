@@ -28,11 +28,11 @@ async function suppressEditorPopups(suppress: boolean) {
 				suggestOnTriggerCharacters: editorConfig.get('suggestOnTriggerCharacters'),
 				inlineSuggest: editorConfig.get('inlineSuggest.enabled'),
 				lightbulb: editorConfig.get('lightbulb.enabled'),
-				cSpellEnabled: cspellConfig.get('enabled'),
-				copilotEnabled: copilotConfig.get('enable'),
-				copilotInlineEnabled: copilotConfig.get('inlineSuggest.enable'),
-				copilotAutoCompletions: copilotEditorConfig.get('enableAutoCompletions'),
-				copilotInlineCompletions: copilotEditorConfig.get('enableInlineCompletions'),
+				cSpellEnabled: cspellConfig.inspect('enabled')?.defaultValue !== undefined ? cspellConfig.get('enabled') : undefined,
+				copilotEnabled: copilotConfig.inspect('enable')?.defaultValue !== undefined ? copilotConfig.get('enable') : undefined,
+				copilotInlineEnabled: copilotConfig.inspect('inlineSuggest.enable')?.defaultValue !== undefined ? copilotConfig.get('inlineSuggest.enable') : undefined,
+				copilotAutoCompletions: copilotEditorConfig.inspect('enableAutoCompletions')?.defaultValue !== undefined ? copilotEditorConfig.get('enableAutoCompletions') : undefined,
+				copilotInlineCompletions: copilotEditorConfig.inspect('enableInlineCompletions')?.defaultValue !== undefined ? copilotEditorConfig.get('enableInlineCompletions') : undefined,
 			};
 			const suggestKeys = [
 				'showWords','showSnippets','showMethods','showFunctions','showVariables','showClasses','showModules','showProperty','showConstructor','showField','showKeyword','showText','showColor','showReference','showEnum','showFile','showFolder','showConstant','showStruct','showEvent','showOperator','showTypeParameter'
@@ -48,19 +48,30 @@ async function suppressEditorPopups(suppress: boolean) {
 		await editorConfig.update('suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('inlineSuggest.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('lightbulb.enabled', false, vscode.ConfigurationTarget.Workspace);
-		await cspellConfig.update('enabled', false, vscode.ConfigurationTarget.Workspace);
-		// Disable all Copilot settings in both workspace and user scope
+		if (typeof cspellConfig.inspect('enabled')?.defaultValue !== 'undefined') {
+			await cspellConfig.update('enabled', false, vscode.ConfigurationTarget.Workspace);
+		}
 		for (const target of configTargets) {
-			await copilotConfig.update('enable', false, target);
-			await copilotConfig.update('inlineSuggest.enable', false, target);
-			await copilotEditorConfig.update('enableAutoCompletions', false, target);
-			await copilotEditorConfig.update('enableInlineCompletions', false, target);
+			if (typeof copilotConfig.inspect('enable')?.defaultValue !== 'undefined') {
+				await copilotConfig.update('enable', false, target);
+			}
+			if (typeof copilotConfig.inspect('inlineSuggest.enable')?.defaultValue !== 'undefined') {
+				await copilotConfig.update('inlineSuggest.enable', false, target);
+			}
+			if (typeof copilotEditorConfig.inspect('enableAutoCompletions')?.defaultValue !== 'undefined') {
+				await copilotEditorConfig.update('enableAutoCompletions', false, target);
+			}
+			if (typeof copilotEditorConfig.inspect('enableInlineCompletions')?.defaultValue !== 'undefined') {
+				await copilotEditorConfig.update('enableInlineCompletions', false, target);
+			}
 		}
 		const suggestKeys = [
 			'showWords','showSnippets','showMethods','showFunctions','showVariables','showClasses','showModules','showProperty','showConstructor','showField','showKeyword','showText','showColor','showReference','showEnum','showFile','showFolder','showConstant','showStruct','showEvent','showOperator','showTypeParameter'
 		];
 		for (const key of suggestKeys) {
-			await editorConfig.update(`suggest.${key}`, false, vscode.ConfigurationTarget.Workspace);
+			if (typeof editorConfig.inspect(`suggest.${key}`)?.defaultValue !== 'undefined') {
+				await editorConfig.update(`suggest.${key}`, false, vscode.ConfigurationTarget.Workspace);
+			}
 		}
 		for (const lang of allLanguages) {
 			await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
@@ -73,16 +84,28 @@ async function suppressEditorPopups(suppress: boolean) {
 		await editorConfig.update('suggestOnTriggerCharacters', previousEditorSettings.suggestOnTriggerCharacters, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('inlineSuggest.enabled', previousEditorSettings.inlineSuggest, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('lightbulb.enabled', previousEditorSettings.lightbulb, vscode.ConfigurationTarget.Workspace);
-		await cspellConfig.update('enabled', previousEditorSettings.cSpellEnabled, vscode.ConfigurationTarget.Workspace);
+		if (typeof cspellConfig.inspect('enabled')?.defaultValue !== 'undefined') {
+			await cspellConfig.update('enabled', previousEditorSettings.cSpellEnabled, vscode.ConfigurationTarget.Workspace);
+		}
 		for (const target of configTargets) {
-			await copilotConfig.update('enable', previousEditorSettings.copilotEnabled, target);
-			await copilotConfig.update('inlineSuggest.enable', previousEditorSettings.copilotInlineEnabled, target);
-			await copilotEditorConfig.update('enableAutoCompletions', previousEditorSettings.copilotAutoCompletions, target);
-			await copilotEditorConfig.update('enableInlineCompletions', previousEditorSettings.copilotInlineCompletions, target);
+			if (typeof copilotConfig.inspect('enable')?.defaultValue !== 'undefined') {
+				await copilotConfig.update('enable', previousEditorSettings.copilotEnabled, target);
+			}
+			if (typeof copilotConfig.inspect('inlineSuggest.enable')?.defaultValue !== 'undefined') {
+				await copilotConfig.update('inlineSuggest.enable', previousEditorSettings.copilotInlineEnabled, target);
+			}
+			if (typeof copilotEditorConfig.inspect('enableAutoCompletions')?.defaultValue !== 'undefined') {
+				await copilotEditorConfig.update('enableAutoCompletions', previousEditorSettings.copilotAutoCompletions, target);
+			}
+			if (typeof copilotEditorConfig.inspect('enableInlineCompletions')?.defaultValue !== 'undefined') {
+				await copilotEditorConfig.update('enableInlineCompletions', previousEditorSettings.copilotInlineCompletions, target);
+			}
 		}
 		const suggestKeys = Object.keys(previousEditorSettings.suggest || {});
 		for (const key of suggestKeys) {
-			await editorConfig.update(`suggest.${key}`, previousEditorSettings.suggest[key], vscode.ConfigurationTarget.Workspace);
+			if (typeof editorConfig.inspect(`suggest.${key}`)?.defaultValue !== 'undefined') {
+				await editorConfig.update(`suggest.${key}`, previousEditorSettings.suggest[key], vscode.ConfigurationTarget.Workspace);
+			}
 		}
 		for (const lang of allLanguages) {
 			await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.quickSuggestions', undefined, vscode.ConfigurationTarget.Workspace);
@@ -223,15 +246,17 @@ export async function handleSnippet(snippetArg?: string, mode: 'type' | 'replace
 	}
 }
 
-export function typeCode(snippetArg?: string) {
+export async function typeCode(snippetArg?: string) {
+	await setTyping(true);
 	handleSnippet(snippetArg, 'type');
 }
 
-export function replaceCode(snippetArg?: string) {
+export async function replaceCode(snippetArg?: string) {
+	await setTyping(true);
 	handleSnippet(snippetArg, 'replace');
 }
 
-export function onType(text: { text: string }) {
+export async function onType(text: { text: string }) {
     if (isTyping) {
 		if (currentPosition < currentSnippet.length) {
 			text.text = currentSnippet[currentPosition];
@@ -259,6 +284,7 @@ async function setSelectionBackgroundToEditorBackground(enable: boolean) {
 		colorCustomizations['editor.selectionBackground'] = editorBg;
 		await config.update('colorCustomizations', colorCustomizations, vscode.ConfigurationTarget.Workspace);
 	} else {
+		clearHighlightDimming();
 		// Create a new object without editor.selectionBackground to avoid mutating the proxy
 		const newCustomizations: any = {};
 		for (const key in colorCustomizations) {
@@ -269,6 +295,7 @@ async function setSelectionBackgroundToEditorBackground(enable: boolean) {
 		await config.update('colorCustomizations', newCustomizations, vscode.ConfigurationTarget.Workspace);
 		previousSelectionBackground = undefined;
 	}
+	
 }
 
 export { setSelectionBackgroundToEditorBackground };
@@ -375,6 +402,7 @@ export async function createSnippetFromSelection() {
 	);
 	await vscode.workspace.fs.writeFile(fsPath, Buffer.from(JSON.stringify(snippetObj, null, 2), 'utf8'));
 	vscode.window.showInformationMessage(`Snippet '${snippetName}' created in Snippets folder.`);
+	loadSnippets(); // Reload snippets to include the new one
 }
 
 function getHighlightConfig() {
