@@ -1,0 +1,116 @@
+{
+  "name": "stagecoder",
+  "displayName": "StageCoder",
+  "description": "StageCoder: Live code presentation and teaching toolkit. Instantly type or replace code from snippets, highlight code, suppress distractions, and create new snippets from selections. Perfect for live demos, workshops, and teaching.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "categories": [
+    "Other",
+    "Education",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "icon": "media/stagecoder.png",
+  "publisher": "EngstromJimmy",
+  "contributes": {
+		"keybindings":[
+			{
+				"command": "stagecoder.escape",
+				"key": "Escape"
+			},
+			{
+				"command": "stagecoder.escape",
+				"key": "Tab"
+			},
+			{
+				"command": "stagecoder.setsnippet",
+				"key": "shift+tab"
+			},
+			{
+				"command": "stagecoder.highlightSelection",
+				"key": "ctrl+alt+h"
+			}
+		],
+		"commands": [
+
+      {
+        "command": "stagecoder.createSnippetFromSelection",
+        "title": "Create snippet from selection",
+        "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.Reloadsnippets",
+        "title": "Reload Snippets",
+        "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.Replacecode",
+        "title": "Replace code with snippet",
+        "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.Typecode",
+        "title": "Type code from snippet",
+        "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.ToggleCodeHighlight",
+        "title": "Toggle Code Highlight",
+        "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.EnableSelectedCodeHighlight",
+        "title": "Enable Selected Code Highlight",
+        "category": "StageCoder"
+      },
+      {
+        "command": "StageCoder.DisableSelectedCodeHighlight",
+        "title": "Disable Selected Code Highlight",
+        "category": "StageCoder"
+      }
+		],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "stagecoder.createSnippetFromSelection",
+          "when": "editorHasSelection",
+          "group": "navigation@100"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "StageCoder",
+      "properties": {
+        "stagecoder.selectedCodeHighlight": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable automatic code highlight on selection."
+        }
+      }
+    }
+	},
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.101.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
