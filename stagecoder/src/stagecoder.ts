@@ -8,6 +8,9 @@ let currentPosition = 0;
 let snippets: Array<{ prefix: string, body: string[] }> = [];
 
 let previousEditorSettings: any = undefined;
+let lastCursorPosition: vscode.Position | undefined;
+let documentChangeListener: vscode.Disposable | undefined;
+let expectedCharacterCount = 0; // Track how many characters we've typed via onType
 
 const allLanguages = [
 	'javascript','typescript','python','markdown','json','html','css','cpp','c','csharp','java','go','php','ruby','rust','kotlin','swift','dart','scala','r','perl','lua','powershell','shellscript','yaml','xml','plaintext'
@@ -42,10 +45,10 @@ async function suppressEditorPopups(suppress: boolean) {
 				previousEditorSettings.suggest[key] = editorConfig.get(`suggest.${key}`);
 			}
 		}
-		await editorConfig.update('quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
+		// await editorConfig.update('quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('parameterHints.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('hover.enabled', false, vscode.ConfigurationTarget.Workspace);
-		await editorConfig.update('suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
+		//  await editorConfig.update('suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('inlineSuggest.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('lightbulb.enabled', false, vscode.ConfigurationTarget.Workspace);
 		if (typeof cspellConfig.inspect('enabled')?.defaultValue !== 'undefined') {
@@ -70,12 +73,12 @@ async function suppressEditorPopups(suppress: boolean) {
 		];
 		for (const key of suggestKeys) {
 			if (typeof editorConfig.inspect(`suggest.${key}`)?.defaultValue !== 'undefined') {
-				await editorConfig.update(`suggest.${key}`, false, vscode.ConfigurationTarget.Workspace);
+			// 	await editorConfig.update(`suggest.${key}`, false, vscode.ConfigurationTarget.Workspace);
 			}
 		}
 		for (const lang of allLanguages) {
-			await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
-			await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
+			// await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
+			// await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
 		}
 	} else if (previousEditorSettings) {
 		await editorConfig.update('quickSuggestions', previousEditorSettings.quickSuggestions, vscode.ConfigurationTarget.Workspace);
@@ -115,9 +118,88 @@ async function suppressEditorPopups(suppress: boolean) {
 	}
 }
 
+function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
+	if (!isTyping || currentPosition >= currentSnippet.length) {
+		return;
+	}
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor || event.document !== editor.document) {
+		return;
+	}
+
+	// Check if there were any content changes
+	if (event.contentChanges.length === 0) {
+		return;
+	}
+
+	const change = event.contentChanges[0];
+	const insertedText = change.text;
+	
+	// If no text was inserted, ignore (deletion)
+	if (!insertedText) {
+		return;
+	}
+
+	// Calculate how much text was inserted vs how much was replaced
+	const insertedLength = insertedText.length;
+	const replacedLength = change.rangeLength;
+
+	// If text was replaced (rangeLength > 0) OR more than 1 character was inserted,
+	// this is likely autocomplete
+	if (replacedLength > 0 || insertedLength > 1) {
+		// Calculate the new cursor position after the change
+		const newCursorPos = new vscode.Position(
+			change.range.start.line,
+			change.range.start.character + insertedLength
+		);
+		
+		// Since snippets can span multiple lines, we need to get the text from the document
+		// starting from where the snippet started
+		const docText = editor.document.getText(new vscode.Range(
+			new vscode.Position(0, 0),
+			newCursorPos
+		));
+		
+		// Find the best match position in our snippet by checking if the document text
+		// ends with progressively longer portions of our snippet
+		let bestMatch = currentPosition;
+		for (let i = currentPosition; i <= currentSnippet.length; i++) {
+			const testSnippet = currentSnippet.substring(0, i);
+			if (docText.endsWith(testSnippet)) {
+				bestMatch = i;
+			}
+		}
+		
+		if (bestMatch > currentPosition) {
+			// Autocomplete inserted text that's in our snippet, skip ahead
+			currentPosition = bestMatch;
+		}
+	}
+}
+
 export async function setTyping(value: boolean) {
 	isTyping = value;
 	await suppressEditorPopups(value);
+	
+	if (value) {
+		// Start listening to document changes when typing mode is enabled
+		if (!documentChangeListener) {
+			documentChangeListener = vscode.workspace.onDidChangeTextDocument(handleDocumentChange);
+		}
+		// Store initial cursor position
+		const editor = vscode.window.activeTextEditor;
+		if (editor) {
+			lastCursorPosition = editor.selection.active;
+		}
+	} else {
+		// Stop listening when typing mode is disabled
+		if (documentChangeListener) {
+			documentChangeListener.dispose();
+			documentChangeListener = undefined;
+		}
+		lastCursorPosition = undefined;
+	}
 }
 
 export function loadSnippets() {
@@ -261,6 +343,13 @@ export async function onType(text: { text: string }) {
 		if (currentPosition < currentSnippet.length) {
 			text.text = currentSnippet[currentPosition];
 			currentPosition++;
+			
+			// Update cursor position before executing type command
+			const editor = vscode.window.activeTextEditor;
+			if (editor) {
+				lastCursorPosition = editor.selection.active;
+			}
+			
 			return vscode.commands.executeCommand('default:type', text);
 		}
 	} else {
@@ -426,4 +515,12 @@ export function enableCodeHighlight() {
 export function disableCodeHighlight() {
 	getHighlightConfig().update('selectedCodeHighlight', false, vscode.ConfigurationTarget.Workspace);
 	setSelectionBackgroundToEditorBackground(false);
+}
+
+export function cleanup() {
+	// Clean up document change listener if it exists
+	if (documentChangeListener) {
+		documentChangeListener.dispose();
+		documentChangeListener = undefined;
+	}
 }
