@@ -13,15 +13,24 @@ let documentChangeListener: vscode.Disposable | undefined;
 let expectedCharacterCount = 0; // Track how many characters we've typed via onType
 
 const allLanguages = [
-	'javascript','typescript','python','markdown','json','html','css','cpp','c','csharp','java','go','php','ruby','rust','kotlin','swift','dart','scala','r','perl','lua','powershell','shellscript','yaml','xml','plaintext'
+	'javascript', 'typescript', 'python', 'markdown', 'json', 'html', 'css', 'cpp', 'c', 'csharp', 'java', 'kql', 'go', 'php', 'ruby', 'rust', 'kotlin', 'swift', 'dart', 'scala', 'r', 'perl', 'lua', 'powershell', 'shellscript', 'yaml', 'xml', 'plaintext'
 ];
 
 async function suppressEditorPopups(suppress: boolean) {
+	// Check if user wants to allow suggestions
+	const stagecoderConfig = vscode.workspace.getConfiguration('stagecoder');
+	const allowSuggestions = stagecoderConfig.get<boolean>('allowSuggestions', false);
+
 	const editorConfig = vscode.workspace.getConfiguration('editor');
 	const cspellConfig = vscode.workspace.getConfiguration('cSpell');
 	const copilotConfig = vscode.workspace.getConfiguration('github.copilot');
 	const copilotEditorConfig = vscode.workspace.getConfiguration('github.copilot.editor');
 	const configTargets = [vscode.ConfigurationTarget.Workspace, vscode.ConfigurationTarget.Global];
+	
+	const suggestKeys = [
+		'showWords', 'showSnippets', 'showMethods', 'showFunctions', 'showVariables', 'showClasses', 'showModules', 'showProperties', 'showConstructors', 'showFields', 'showKeywords', 'showColors', 'showReferences', 'showEnums', 'showFiles', 'showFolders', 'showConstants', 'showStructs', 'showEvents', 'showOperators', 'showTypeParameters'
+	];
+
 	if (suppress) {
 		if (!previousEditorSettings) {
 			previousEditorSettings = {
@@ -37,18 +46,31 @@ async function suppressEditorPopups(suppress: boolean) {
 				copilotAutoCompletions: copilotEditorConfig.inspect('enableAutoCompletions')?.defaultValue !== undefined ? copilotEditorConfig.get('enableAutoCompletions') : undefined,
 				copilotInlineCompletions: copilotEditorConfig.inspect('enableInlineCompletions')?.defaultValue !== undefined ? copilotEditorConfig.get('enableInlineCompletions') : undefined,
 			};
-			const suggestKeys = [
-				'showWords','showSnippets','showMethods','showFunctions','showVariables','showClasses','showModules','showProperty','showConstructor','showField','showKeyword','showText','showColor','showReference','showEnum','showFile','showFolder','showConstant','showStruct','showEvent','showOperator','showTypeParameter'
-			];
 			previousEditorSettings.suggest = {};
 			for (const key of suggestKeys) {
 				previousEditorSettings.suggest[key] = editorConfig.get(`suggest.${key}`);
 			}
 		}
-		// await editorConfig.update('quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
+
+		// Suppress suggestions if user hasn't enabled "Allow suggestions"
+		if (!allowSuggestions) {
+			await editorConfig.update('quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
+			await editorConfig.update('suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
+
+			for (const key of suggestKeys) {
+				if (typeof editorConfig.inspect(`suggest.${key}`)?.defaultValue !== 'undefined') {
+					await editorConfig.update(`suggest.${key}`, false, vscode.ConfigurationTarget.Workspace);
+				}
+			}
+			for (const lang of allLanguages) {
+				await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
+				await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
+			}
+		}
+
+		// Always suppress these non-suggestion features
 		await editorConfig.update('parameterHints.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('hover.enabled', false, vscode.ConfigurationTarget.Workspace);
-		//  await editorConfig.update('suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('inlineSuggest.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('lightbulb.enabled', false, vscode.ConfigurationTarget.Workspace);
 		if (typeof cspellConfig.inspect('enabled')?.defaultValue !== 'undefined') {
@@ -67,18 +89,6 @@ async function suppressEditorPopups(suppress: boolean) {
 			if (typeof copilotEditorConfig.inspect('enableInlineCompletions')?.defaultValue !== 'undefined') {
 				await copilotEditorConfig.update('enableInlineCompletions', false, target);
 			}
-		}
-		const suggestKeys = [
-			'showWords','showSnippets','showMethods','showFunctions','showVariables','showClasses','showModules','showProperty','showConstructor','showField','showKeyword','showText','showColor','showReference','showEnum','showFile','showFolder','showConstant','showStruct','showEvent','showOperator','showTypeParameter'
-		];
-		for (const key of suggestKeys) {
-			if (typeof editorConfig.inspect(`suggest.${key}`)?.defaultValue !== 'undefined') {
-			// 	await editorConfig.update(`suggest.${key}`, false, vscode.ConfigurationTarget.Workspace);
-			}
-		}
-		for (const lang of allLanguages) {
-			// await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.quickSuggestions', false, vscode.ConfigurationTarget.Workspace);
-			// await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
 		}
 	} else if (previousEditorSettings) {
 		await editorConfig.update('quickSuggestions', previousEditorSettings.quickSuggestions, vscode.ConfigurationTarget.Workspace);
@@ -135,7 +145,7 @@ function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
 
 	const change = event.contentChanges[0];
 	const insertedText = change.text;
-	
+
 	// If no text was inserted, ignore (deletion)
 	if (!insertedText) {
 		return;
@@ -153,14 +163,14 @@ function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
 			change.range.start.line,
 			change.range.start.character + insertedLength
 		);
-		
+
 		// Since snippets can span multiple lines, we need to get the text from the document
 		// starting from where the snippet started
 		const docText = editor.document.getText(new vscode.Range(
 			new vscode.Position(0, 0),
 			newCursorPos
 		));
-		
+
 		// Find the best match position in our snippet by checking if the document text
 		// ends with progressively longer portions of our snippet
 		let bestMatch = currentPosition;
@@ -170,7 +180,7 @@ function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
 				bestMatch = i;
 			}
 		}
-		
+
 		if (bestMatch > currentPosition) {
 			// Autocomplete inserted text that's in our snippet, skip ahead
 			currentPosition = bestMatch;
@@ -181,7 +191,7 @@ function handleDocumentChange(event: vscode.TextDocumentChangeEvent) {
 export async function setTyping(value: boolean) {
 	isTyping = value;
 	await suppressEditorPopups(value);
-	
+
 	if (value) {
 		// Start listening to document changes when typing mode is enabled
 		if (!documentChangeListener) {
@@ -339,17 +349,14 @@ export async function replaceCode(snippetArg?: string) {
 }
 
 export async function onType(text: { text: string }) {
-    if (isTyping) {
+	if (isTyping) {
 		if (currentPosition < currentSnippet.length) {
 			text.text = currentSnippet[currentPosition];
 			currentPosition++;
-			
+
 			// Update cursor position before executing type command
-			const editor = vscode.window.activeTextEditor;
-			if (editor) {
-				lastCursorPosition = editor.selection.active;
-			}
-			
+			lastCursorPosition = vscode.window.activeTextEditor?.selection.active;
+
 			return vscode.commands.executeCommand('default:type', text);
 		}
 	} else {
@@ -384,7 +391,7 @@ async function setSelectionBackgroundToEditorBackground(enable: boolean) {
 		await config.update('colorCustomizations', newCustomizations, vscode.ConfigurationTarget.Workspace);
 		previousSelectionBackground = undefined;
 	}
-	
+
 }
 
 export { setSelectionBackgroundToEditorBackground };

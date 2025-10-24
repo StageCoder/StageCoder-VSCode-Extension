@@ -96,6 +96,11 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Opacity for dimming non-selected code (0 = fully transparent, 1 = fully opaque)."
+        },
+        "stagecoder.allowSuggestions": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow code suggestions and autocompletions while typing snippets."
         }
       }
     }
