@@ -101,6 +101,11 @@
           "type": "boolean",
           "default": false,
           "description": "Allow code suggestions and autocompletions while typing snippets."
+        },
+        "stagecoder.allowHover": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow hover popups while typing snippets."
         }
       }
     }

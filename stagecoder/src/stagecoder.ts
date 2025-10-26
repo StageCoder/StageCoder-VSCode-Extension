@@ -20,6 +20,7 @@ async function suppressEditorPopups(suppress: boolean) {
 	// Check if user wants to allow suggestions
 	const stagecoderConfig = vscode.workspace.getConfiguration('stagecoder');
 	const allowSuggestions = stagecoderConfig.get<boolean>('allowSuggestions', false);
+	const allowHover = stagecoderConfig.get<boolean>('allowHover', false);
 
 	const editorConfig = vscode.workspace.getConfiguration('editor');
 	const cspellConfig = vscode.workspace.getConfiguration('cSpell');
@@ -67,10 +68,14 @@ async function suppressEditorPopups(suppress: boolean) {
 				await vscode.workspace.getConfiguration('', { languageId: lang }).update('editor.suggestOnTriggerCharacters', false, vscode.ConfigurationTarget.Workspace);
 			}
 		}
+		
+		// Suppress hover if user hasn't enabled "Allow hover"
+		if (!allowHover) {
+			await editorConfig.update('hover.enabled', false, vscode.ConfigurationTarget.Workspace);
+		}
 
 		// Always suppress these non-suggestion features
 		await editorConfig.update('parameterHints.enabled', false, vscode.ConfigurationTarget.Workspace);
-		await editorConfig.update('hover.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('inlineSuggest.enabled', false, vscode.ConfigurationTarget.Workspace);
 		await editorConfig.update('lightbulb.enabled', false, vscode.ConfigurationTarget.Workspace);
 		if (typeof cspellConfig.inspect('enabled')?.defaultValue !== 'undefined') {

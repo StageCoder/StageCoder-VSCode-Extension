@@ -56,6 +56,7 @@ For hands-free control, use the [decks-vscode](https://marketplace.visualstudio.
 - `stagecoder.selectedCodeHighlight` (boolean): Enable automatic code highlight on selection (default: false).
 - `stagecoder.dimOpacity` (number): Opacity level for dimmed code when highlighting (default: 0.2).
 - `stagecoder.allowSuggestions` (boolean): Allow intellisense suggestions during snippet typing (default: false).
+- `stagecoder.allowHover` (boolean): Allow hover popups during snippet typing (default: false).
 
 ## Requirements
 
