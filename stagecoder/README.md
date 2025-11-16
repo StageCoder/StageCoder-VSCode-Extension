@@ -19,8 +19,8 @@ Simulate live typing for presentations:
 - **Type code from snippets**: Simulate live typing of code from a snippet or your clipboard.
 - **Replace code with snippets**: Instantly replace a selection or comment with a snippet or clipboard content.
 - **Create snippets from selection**: Right-click any selection and choose "Create snippet from selection" to save it for later use.
-- **Highlight code**: Dim all non-selected text to focus your audience’s attention. Toggle with a shortcut.
-- **Distraction suppression**: While typing or replacing code, all suggestions, Copilot, and popups are suppressed.
+- **Highlight code**: Dim all non-selected text to focus your audience's attention. Toggle with a shortcut.
+- **Distraction suppression**: While typing or replacing code, all suggestions, Copilot, and popups are suppressed. Suggestions can be optionally allowed.
 - **Stream Deck support**: Use the command names `StageCoder.Typecode` and `StageCoder.Replacecode` for Stream Deck integration.
 
 ## How to Use (Command Palette)
@@ -54,6 +54,9 @@ For hands-free control, use the [decks-vscode](https://marketplace.visualstudio.
 ## Settings
 
 - `stagecoder.selectedCodeHighlight` (boolean): Enable automatic code highlight on selection (default: false).
+- `stagecoder.dimOpacity` (number): Opacity level for dimmed code when highlighting (default: 0.2).
+- `stagecoder.allowSuggestions` (boolean): Allow intellisense suggestions during snippet typing (default: false).
+- `stagecoder.allowHover` (boolean): Allow hover popups during snippet typing (default: false).
 
 ## Requirements
 
