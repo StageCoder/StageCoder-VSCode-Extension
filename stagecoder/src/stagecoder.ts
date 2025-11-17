@@ -357,9 +357,6 @@ export async function onType(text: { text: string }) {
 	if (isTyping) {
 		if (currentPosition < currentSnippet.length) {
 
-			// Update cursor position before executing type command
-			lastCursorPosition = vscode.window.activeTextEditor?.selection.active;
-
 			const editor = vscode.window.activeTextEditor;
 			if (editor) {
 				const cursorPos = editor.selection.active;
@@ -369,6 +366,10 @@ export async function onType(text: { text: string }) {
 					return vscode.commands.executeCommand('cursorRight');
 				}
 			}
+
+			// Update cursor position before executing type command
+			lastCursorPosition = editor?.selection.active;
+
 			text.text = currentSnippet[currentPosition];
 			currentPosition++;
 
