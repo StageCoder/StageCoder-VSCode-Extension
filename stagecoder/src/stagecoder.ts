@@ -13,7 +13,7 @@ let documentChangeListener: vscode.Disposable | undefined;
 let expectedCharacterCount = 0; // Track how many characters we've typed via onType
 
 const allLanguages = [
-	'javascript', 'typescript', 'python', 'markdown', 'json', 'html', 'css', 'cpp', 'c', 'csharp', 'java', 'kql', 'go', 'php', 'ruby', 'rust', 'kotlin', 'swift', 'dart', 'scala', 'r', 'perl', 'lua', 'powershell', 'shellscript', 'yaml', 'xml', 'plaintext'
+	'javascript', 'typescript', 'python', 'markdown', 'json', 'html', 'bicep', 'css', 'cpp', 'c', 'csharp', 'java', 'kql', 'go', 'php', 'ruby', 'rust', 'kotlin', 'swift', 'dart', 'scala', 'r', 'perl', 'lua', 'powershell', 'shellscript', 'yaml', 'xml', 'plaintext'
 ];
 
 async function suppressEditorPopups(suppress: boolean) {
@@ -356,11 +356,22 @@ export async function replaceCode(snippetArg?: string) {
 export async function onType(text: { text: string }) {
 	if (isTyping) {
 		if (currentPosition < currentSnippet.length) {
-			text.text = currentSnippet[currentPosition];
-			currentPosition++;
+
+			const editor = vscode.window.activeTextEditor;
+			if (editor) {
+				const cursorPos = editor.selection.active;
+				const charAfterCursor = editor.document.getText(new vscode.Range(cursorPos, cursorPos.translate(0, 1)));
+				if (charAfterCursor === currentSnippet[currentPosition]) {
+					currentPosition++;
+					return vscode.commands.executeCommand('cursorRight');
+				}
+			}
 
 			// Update cursor position before executing type command
-			lastCursorPosition = vscode.window.activeTextEditor?.selection.active;
+			lastCursorPosition = editor?.selection.active;
+
+			text.text = currentSnippet[currentPosition];
+			currentPosition++;
 
 			return vscode.commands.executeCommand('default:type', text);
 		}
